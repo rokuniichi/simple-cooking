@@ -1,22 +1,21 @@
-﻿using System;
-using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    
     public static GameController Instance { get; private set; }
 
-    public ConfigHandler ConfigHandler = new ConfigHandler();
-
     MainConfig _config;
-    
+
     public float LevelTime { get; private set; }
 
-    void Awake() {
-        if ( Instance ) {
+    void Awake()
+    {
+        if (Instance)
+        {
             Destroy(gameObject);
-        } else {
+        }
+        else
+        {
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
@@ -41,6 +40,7 @@ public class GameController : MonoBehaviour
 
     void Setup()
     {
-        _config = ConfigHandler.Load<MainConfig>(ConfigPaths.MAIN_CONFIG_PATH);
+        var configHandler = new ConfigHandler();
+        _config = configHandler.Load<MainConfig>(ConfigPaths.MAIN_CONFIG_PATH);
     }
 }

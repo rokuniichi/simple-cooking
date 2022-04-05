@@ -1,4 +1,3 @@
-﻿using System.IO;
-using Newtonsoft.Json;
-
-public interface IConfig { }
+﻿public interface IConfig
+{
+}

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-public class MainConfigEditor : EditorWindow
+public class ConfigEditor : EditorWindow
 {
     string _customersNumber;
     string _ordersNumber;
@@ -10,11 +10,11 @@ public class MainConfigEditor : EditorWindow
     ConfigHandler _configLoader;
     MainConfig    _config;
 
-    [MenuItem("Tools/Main Config Editor")]
+    [MenuItem("Tools/Config Editor")]
     static void ShowWindow()
     {
        
-        var window = (MainConfigEditor)GetWindow(typeof(MainConfigEditor));
+        var window = (ConfigEditor)GetWindow(typeof(ConfigEditor));
         window.Init();
         window.Show();
     }
