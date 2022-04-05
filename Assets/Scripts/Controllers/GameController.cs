@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+    
     public static GameController Instance { get; private set; }
 
-    MainConfigManager _mainConfigManager;
-    
-    MainConfig _config => _mainConfigManager.MainConfig;
+    public ConfigHandler ConfigHandler = new ConfigHandler();
+
+    MainConfig _config;
     
     public float LevelTime { get; private set; }
 
@@ -40,6 +41,6 @@ public class GameController : MonoBehaviour
 
     void Setup()
     {
-        _mainConfigManager = new MainConfigManager();
+        _config = ConfigHandler.Load<MainConfig>(ConfigPaths.MAIN_CONFIG_PATH);
     }
 }

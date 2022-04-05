@@ -1,4 +1,4 @@
-﻿public class MainConfig
+﻿public class MainConfig : IConfig
 {
     public int   CustomersNumber;
     public int   OrdersNumber;
