@@ -21,6 +21,7 @@ public class CustomerController : BaseController<CustomerController>
     public int OrdersPerCustomer => _config.OrdersPerCustomer;
 
     public event Action CustomersRemainingChanged;
+    public event Action BoostersRemainingChanged;
 
     GameController _gc;
     MainConfig     _config;
@@ -81,8 +82,18 @@ public class CustomerController : BaseController<CustomerController>
     {
         foreach (var customer in _customers)
         {
-            if (customer.IsServable() && customer.TryServeOrder(order) && PostServeOrder(customer)) return;
+            if (customer.IsServable() && customer.TryServeOrder(order))
+            {
+                PostServeOrder(customer);
+                return;
+            }
         }
+    }
+
+    public void BuyBooster()
+    {
+        BoostersRemaining++;
+        BoostersRemainingChanged?.Invoke();
     }
     
     public void UseBooster()
@@ -95,20 +106,18 @@ public class CustomerController : BaseController<CustomerController>
                 customer.UseBooster();
                 PostServeOrder(customer);
                 BoostersRemaining--;
+                if (BoostersRemaining == 0) _gc.Buy();
             }
         }
     }
 
-    bool PostServeOrder(Customer customer)
+    void PostServeOrder(Customer customer)
     {
-        CheckWinCondition();
         if (!customer.IsServable())
         {
             FreeCustomer(customer);
-            return true;
         }
-
-        return false;
+        CheckWinCondition();
     }
 
     void EngageCustomer()

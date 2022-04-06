@@ -11,7 +11,19 @@ public class Booster : MonoBehaviour
     public void Init()
     {
         _cc = CustomerController.Instance;
+        _cc.BoostersRemainingChanged += UpdateText;
         UpdateText();
+    }
+    
+    public void DeInit()
+    {
+        _cc.BoostersRemainingChanged -= UpdateText;
+
+    }
+
+    private void OnDestroy()
+    {
+        DeInit();
     }
     
     public void UseBooster()

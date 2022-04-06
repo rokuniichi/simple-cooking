@@ -13,9 +13,8 @@ public class RestartWindow : MonoBehaviour
 
     public void Restart()
     {
-        GameController.Instance.Restart();
-        RestartButton.onClick.RemoveListener(Restart);
+        RestartButton.onClick.RemoveAllListeners();
         gameObject.SetActive(false);
-
+        GameController.Instance.Restart();
     }
 }
