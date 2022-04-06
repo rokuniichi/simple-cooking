@@ -5,10 +5,12 @@ using Random = UnityEngine.Random;
 
 public class CustomerController : BaseController<CustomerController>
 {
-    public GameObject    PoolRoot;
-    public OrderSetup    OrderSetup;
-    public CustomerSetup CustomerSetup;
-    public List<Place>   CustomerPlaces;
+    public GameObject      PoolRoot;
+    public OrderSetup      OrderSetup;
+    public CustomerSetup   CustomerSetup;
+    public List<Place>     CustomerPlaces;
+    public Transform       CustomerBackground;
+    public List<Transform> CustomerWaypoints;
 
     public int CustomersRemaining { get; private set; }
     public int OrdersRemaining    { get; private set; }
@@ -41,26 +43,7 @@ public class CustomerController : BaseController<CustomerController>
        _orderHolder = PoolRoot.AddComponent<OrderHolder>();
    }
 
-   public void TryServeOrder(string order)
-   {
-        foreach (var customer in _customers)
-        {
-            if (customer.TryServeOrder(order))
-            {
-                _ordersServed++;
-                if (!customer.HasOrders())
-                {
-                    customer.Return();
-                    _customers.Remove(customer);
-                }
-                
-                CheckWinCondition();
-                return;
-            }
-        }
-   }
-
-    public void Init()
+   public void Init()
     {
         _gc = GameController.Instance;
         _config = _gc.Config;
@@ -86,6 +69,25 @@ public class CustomerController : BaseController<CustomerController>
             customerPlace.Free();
         }
     }
+   
+   public void TryServeOrder(string order)
+   {
+       foreach (var customer in _customers)
+       {
+           if (customer.TryServeOrder(order))
+           {
+               _ordersServed++;
+               if (!customer.HasOrders())
+               {
+                   customer.AnimateDeparture(CustomerBackground,GetCustomerWaypoint());
+                   _customers.Remove(customer);
+               }
+                
+               CheckWinCondition();
+               return;
+           }
+       }
+   }
 
     void EngageCustomer()
     {
@@ -95,19 +97,24 @@ public class CustomerController : BaseController<CustomerController>
             var customer = _customerHolder.GetObject();
             if (customer)
             {
-                customer.Place(place);
+                var orders = new List<Order>();
                 var n = Random.Range(1, Mathf.Clamp((OrdersRemaining - CustomersRemaining) + 1, 1, OrdersPerCustomer) + 1);
                 for (var i = n; i > 0; i--)
                 {
-                    var order = _orderHolder.GetObject();
-                    customer.CreateOrder(order);
+                    orders.Add(_orderHolder.GetObject());
                 }
+                customer.AnimateArrival(CustomerBackground, GetCustomerWaypoint(), place, orders);
                 _customers.Add(customer);
                 OrdersRemaining -= n;
                 CustomersRemaining--;
                 CustomersRemainingChanged?.Invoke();
             }
         }
+    }
+
+    Transform GetCustomerWaypoint()
+    {
+        return CustomerWaypoints[Random.Range(0, CustomerWaypoints.Count)];
     }
 
     void CheckWinCondition()

@@ -7,6 +7,8 @@ public class Order : PlaceableObject
     public override void Place(Place place)
     {
         base.Place(place);
+        transform.SetParent(place.transform);
+        transform.localPosition = Vector3.zero;
         var rt = GetComponent<RectTransform>();
         rt.anchorMin        = Vector2.zero;
         rt.anchorMax        = Vector2.one;

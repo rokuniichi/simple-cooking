@@ -167,6 +167,7 @@ MonoBehaviour:
   - {fileID: 6551898788867352328}
   - {fileID: 604002462838341836}
   - {fileID: 182086872226687028}
+  Bubble: {fileID: 1408728490264581116}
 --- !u!1 &2878760837253777350
 GameObject:
   m_ObjectHideFlags: 0
