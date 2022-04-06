@@ -5,11 +5,11 @@ using UnityEngine;
 public class Customer : PlaceableObject
 {
     public List<Place> OrderPlaces;
-    public GameObject  Bubble;
-    
+    public GameObject Bubble;
+
     Sequence    _sequence;
     List<Order> _orders;
-    
+
     public bool TryServeOrder(string order)
     {
         var o = _orders.Find(x => x.Name == order);
@@ -46,7 +46,8 @@ public class Customer : PlaceableObject
     }
 
     public void AnimateDeparture(Transform background, Transform to)
-    {   Bubble.SetActive(false);
+    {
+        Bubble.SetActive(false);
         transform.SetParent(background);
         Return();
         RefreshSequence();
@@ -60,7 +61,7 @@ public class Customer : PlaceableObject
         {
             orderPlace.Free();
         }
-        
+
         foreach (var order in _orders)
         {
             var place = OrderPlaces.Find(x => x.IsFree);
@@ -70,10 +71,12 @@ public class Customer : PlaceableObject
 
     void RefreshSequence()
     {
-        if ( _sequence != null ) {
+        if (_sequence != null)
+        {
             _sequence.SetAutoKill(false);
             _sequence.Kill();
         }
+
         _sequence = DOTween.Sequence();
     }
 }

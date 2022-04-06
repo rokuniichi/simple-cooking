@@ -2,7 +2,7 @@
 
 public class GameController : BaseController<GameController>
 {
-    public TopUI TopUI;
+    public TopUI         TopUI;
     public RestartWindow VictoryWindow;
     public RestartWindow DefeatWindow;
     
