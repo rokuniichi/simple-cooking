@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class ObjectHolder<T> : MonoBehaviour where T : MonoBehaviour
 {
-    List<T> _list;
+    List<T> _list = new List<T>();
 
     public void PopulateHolder(List<T> templates, int num)
     {
-        _list = new List<T>();
+        Clear();
         for (var i = num; i > 0; i--)
         {
             var obj = Instantiate(templates[Random.Range(0, templates.Count)], gameObject.transform);
@@ -22,5 +22,14 @@ public class ObjectHolder<T> : MonoBehaviour where T : MonoBehaviour
         _list.Remove(obj);
         obj.gameObject.SetActive(true);
         return obj;
+    }
+
+    void Clear()
+    {
+        foreach (var obj in _list)
+        {
+            Destroy(obj.gameObject);
+        }
+        _list.Clear();
     }
 }

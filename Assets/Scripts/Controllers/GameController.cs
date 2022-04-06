@@ -2,6 +2,10 @@
 
 public class GameController : BaseController<GameController>
 {
+    public TopUI TopUI;
+    public RestartWindow VictoryWindow;
+    public RestartWindow DefeatWindow;
+    
     public MainConfig Config { get; private set; }
     public float LevelTime { get; private set; }
 
@@ -15,7 +19,7 @@ public class GameController : BaseController<GameController>
         LevelTime -= Time.deltaTime;
         if (LevelTime < 0)
         {
-            Stop();
+            Lose();
         }
     }
 
@@ -23,16 +27,37 @@ public class GameController : BaseController<GameController>
     {
         var configHandler = new ConfigHandler();
         Config = configHandler.Load<MainConfig>(ConfigPaths.MAIN_CONFIG_PATH);
-        LevelTime = Config.LevelTime;
     }
 
-    void Init()
+    public void Restart()
     {
-        Time.timeScale = 1f;
+        TopUI.DeInit();
+        Init();
     }
 
-    public void Stop()
+    public void Win()
+    {
+        Stop();
+        VictoryWindow.Show();
+    }
+
+    void Lose()
+    {
+        Stop();
+        DefeatWindow.Show();
+    }
+    
+    void Stop()
     {
         Time.timeScale = 0f;
+        LevelTime = 0f;
+    }
+    
+    void Init()
+    {
+        CustomerController.Instance.Init();
+        LevelTime = Config.LevelTime;
+        TopUI.Init();
+        Time.timeScale = 1f;
     }
 }

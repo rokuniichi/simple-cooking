@@ -31,14 +31,14 @@ public class Customer : PlaceableObject
         {
             o.Return();
             _orders.Remove(o);
-            if (_orders.Count == 0)
-            {
-                Return();
-            }
-            
             return true;
         }
 
         return false;
+    }
+
+    public bool HasOrders()
+    {
+        return _orders.Count > 0;
     }
 }

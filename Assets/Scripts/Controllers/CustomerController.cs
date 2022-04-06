@@ -26,35 +26,41 @@ public class CustomerController : BaseController<CustomerController>
     OrderHolder    _orderHolder;
     CustomerHolder _customerHolder;
 
-    List<Customer> _customers;
+    List<Customer> _customers = new List<Customer>();
 
     int _ordersServed;
-    int _customerIndex;
 
-    void Start()
-    {
-        Init();
-    }
-
-    void Update()
+   void Update()
     {
         if (CustomersRemaining > 0) EngageCustomer();
-        if (_ordersServed == OrdersTotal) _gc.Stop();
     }
-    
-    public void TryServeOrder(string order)
-    {
+
+   protected override void PreInit()
+   {
+       _customerHolder = PoolRoot.AddComponent<CustomerHolder>();
+       _orderHolder = PoolRoot.AddComponent<OrderHolder>();
+   }
+
+   public void TryServeOrder(string order)
+   {
         foreach (var customer in _customers)
         {
             if (customer.TryServeOrder(order))
             {
                 _ordersServed++;
+                if (!customer.HasOrders())
+                {
+                    customer.Return();
+                    _customers.Remove(customer);
+                }
+                
+                CheckWinCondition();
                 return;
             }
         }
-    }
+   }
 
-    void Init()
+    public void Init()
     {
         _gc = GameController.Instance;
         _config = _gc.Config;
@@ -64,18 +70,21 @@ public class CustomerController : BaseController<CustomerController>
         {
             Debug.LogError("Number of orders is less then number of customers!");
         }
-
-        _customerHolder = PoolRoot.AddComponent<CustomerHolder>();
-        _orderHolder = PoolRoot.AddComponent<OrderHolder>();
+        
         _customerHolder.PopulateHolder(CustomerSetup.CustomerEntries, CustomersTotal);
         _orderHolder.PopulateHolder(OrderSetup.OrderEntries, OrdersTotal);
+        _ordersServed = 0;
 
+        foreach (var customer in _customers)
+        {
+            customer.Return();
+        }
+        _customers.Clear();
+        
         foreach (var customerPlace in CustomerPlaces)
         {
             customerPlace.Free();
         }
-
-        _customers = new List<Customer>();
     }
 
     void EngageCustomer()
@@ -99,5 +108,10 @@ public class CustomerController : BaseController<CustomerController>
                 CustomersRemainingChanged?.Invoke();
             }
         }
+    }
+
+    void CheckWinCondition()
+    {
+        if (_ordersServed == OrdersTotal || _customers.Count == 0) _gc.Win();
     }
 }

@@ -10,8 +10,7 @@ public class TopUI : MonoBehaviour
     GameController _gc;
     CustomerController _cc;
     
-    // Start is called before the first frame update
-    void Start()
+    public void Init()
     {
         _gc = GameController.Instance;
         _cc = CustomerController.Instance;
@@ -19,12 +18,17 @@ public class TopUI : MonoBehaviour
         OnCustomersRemainingChanged();
     }
 
-    private void OnDestroy()
+    public void DeInit()
     {
         _cc.CustomersRemainingChanged -= OnCustomersRemainingChanged;
+
     }
 
-    // Update is called once per frame
+    private void OnDestroy()
+    {
+        DeInit();
+    }
+
     void LateUpdate()
     {
         var timerText = TimeSpan.FromSeconds(_gc.LevelTime).ToString("mm':'ss");
