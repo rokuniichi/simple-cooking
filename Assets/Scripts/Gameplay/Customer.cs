@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
@@ -9,13 +10,25 @@ public class Customer : PlaceableObject
 
     Sequence    _sequence;
     List<Order> _orders;
+    
+    public event Action OrderServed;
+    
+    public bool IsServable()
+    {
+        return HasOrders() && Bubble.activeSelf;
+    }
 
+    public bool HasOrders()
+    {
+        return _orders.Count > 0;
+    }
+    
     public bool TryServeOrder(string order)
     {
         var o = _orders.Find(x => x.Name == order);
         if (o)
         {
-            o.Return();
+            ServeOrder(o);
             _orders.Remove(o);
             return true;
         }
@@ -23,14 +36,19 @@ public class Customer : PlaceableObject
         return false;
     }
 
-    public bool IsServable()
+    public void UseBooster()
     {
-        return _orders.Count > 0 && Bubble.activeSelf;
+        foreach (var order in _orders)
+        {
+            ServeOrder(order);
+        }
+        
+        _orders.Clear();
     }
 
     public void AnimateArrival(Transform background, Transform from, Place place, List<Order> orders)
     {
-        if (_sequence != null) return;
+        if (_sequence != null && _sequence.IsActive()) return;
         _orders = orders;
         CreateOrders();
         transform.position = from.position;
@@ -48,7 +66,7 @@ public class Customer : PlaceableObject
 
     public void AnimateDeparture(Transform background, Transform to)
     {
-        if (_sequence != null && _orders.Count == 0) return;
+        if (_sequence != null && _sequence.IsActive() && !HasOrders()) return;
         ClearOrders();
         Bubble.SetActive(false);
         transform.SetParent(background);
@@ -81,6 +99,12 @@ public class Customer : PlaceableObject
         }
         
         _orders.Clear();
+    }
+
+    void ServeOrder(Order order)
+    {
+        order.Return();
+        OrderServed?.Invoke();
     }
 
     void RefreshSequence()

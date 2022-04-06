@@ -3,6 +3,7 @@
 public class GameController : BaseController<GameController>
 {
     public TopUI         TopUI;
+    public Booster       BoosterButton;
     public RestartWindow VictoryWindow;
     public RestartWindow DefeatWindow;
     
@@ -55,6 +56,7 @@ public class GameController : BaseController<GameController>
         CustomerController.Instance.Init();
         LevelTime = Config.LevelTime;
         TopUI.Init();
+        BoosterButton.Init();
         Time.timeScale = 1f;
     }
 }

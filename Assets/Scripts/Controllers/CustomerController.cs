@@ -14,6 +14,7 @@ public class CustomerController : BaseController<CustomerController>
 
     public int CustomersRemaining { get; private set; }
     public int OrdersRemaining { get; private set; }
+    public int BoostersRemaining { get; private set; }
 
     public int CustomersTotal    => _config.CustomersTotal;
     public int OrdersTotal       => _config.OrdersTotal;
@@ -51,6 +52,7 @@ public class CustomerController : BaseController<CustomerController>
         _gc = GameController.Instance;
         _config = _gc.Config;
         CustomersRemaining = CustomersTotal;
+        BoostersRemaining = _config.BoostersNumber;
         OrdersRemaining = OrdersTotal;
         if (OrdersTotal < CustomersTotal)
         {
@@ -79,20 +81,34 @@ public class CustomerController : BaseController<CustomerController>
     {
         foreach (var customer in _customers)
         {
-            if (customer.TryServeOrder(order))
+            if (customer.IsServable() && customer.TryServeOrder(order) && PostServeOrder(customer)) return;
+        }
+    }
+    
+    public void UseBooster()
+    {
+        if (BoostersRemaining > 0 && _customers.Count > 0)
+        {
+            var customer = _customers[0];
+            if (customer.IsServable())
             {
-                _ordersServed++;
-                if (!customer.IsServable())
-                {
-                    customer.AnimateDeparture(CustomerBackground, GetCustomerWaypoint());
-                    _customers.Remove(customer);
-                    _waitTime = 1f;
-                }
-
-                CheckWinCondition();
-                return;
+                customer.UseBooster();
+                PostServeOrder(customer);
+                BoostersRemaining--;
             }
         }
+    }
+
+    bool PostServeOrder(Customer customer)
+    {
+        CheckWinCondition();
+        if (!customer.IsServable())
+        {
+            FreeCustomer(customer);
+            return true;
+        }
+
+        return false;
     }
 
     void EngageCustomer()
@@ -109,15 +125,23 @@ public class CustomerController : BaseController<CustomerController>
                 {
                     orders.Add(_orderHolder.GetObject());
                 }
-
-                customer.AnimateArrival(CustomerBackground, GetCustomerWaypoint(), place, orders);
                 _customers.Add(customer);
+                customer.OrderServed += OnOrderServed;
+                customer.AnimateArrival(CustomerBackground, GetCustomerWaypoint(), place, orders);
                 OrdersRemaining -= n;
                 CustomersRemaining--;
                 CustomersRemainingChanged?.Invoke();
                 _waitTime = 1f;
             }
         }
+    }
+
+    void FreeCustomer(Customer customer)
+    {
+        _customers.Remove(customer);
+        customer.OrderServed -= OnOrderServed;
+        customer.AnimateDeparture(CustomerBackground, GetCustomerWaypoint());
+        _waitTime = 1f;
     }
 
     Transform GetCustomerWaypoint()
@@ -128,5 +152,10 @@ public class CustomerController : BaseController<CustomerController>
     void CheckWinCondition()
     {
         if (_ordersServed == OrdersTotal || _customers.Count == 0) _gc.Win();
+    }
+
+    void OnOrderServed()
+    {
+        _ordersServed++;
     }
 }
