@@ -17,10 +17,7 @@ public class GameController : BaseController<GameController>
     void Update()
     {
         LevelTime -= Time.deltaTime;
-        if (LevelTime < 0)
-        {
-            Lose();
-        }
+        if (LevelTime < 0f) Lose();
     }
 
     protected override void PreInit()
@@ -44,13 +41,13 @@ public class GameController : BaseController<GameController>
     void Lose()
     {
         Stop();
+        LevelTime = 0f;
         DefeatWindow.Show();
     }
     
     void Stop()
     {
         Time.timeScale = 0f;
-        LevelTime = 0f;
     }
     
     void Init()
