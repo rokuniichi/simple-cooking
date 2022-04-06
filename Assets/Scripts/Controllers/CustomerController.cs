@@ -28,11 +28,16 @@ public class CustomerController : BaseController<CustomerController>
 
     List<Customer> _customers = new List<Customer>();
 
-    int _ordersServed;
+    int   _ordersServed;
+    float _waitTime;
 
     void Update()
     {
-        if (CustomersRemaining > 0) EngageCustomer();
+        _waitTime -= Time.deltaTime;
+        if (_waitTime < 0f && CustomersRemaining > 0)
+        {
+            EngageCustomer();
+        }
     }
 
     protected override void PreInit()
@@ -55,17 +60,11 @@ public class CustomerController : BaseController<CustomerController>
         _customerHolder.PopulateHolder(CustomerSetup.CustomerEntries, CustomersTotal);
         _orderHolder.PopulateHolder(OrderSetup.OrderEntries, OrdersTotal);
         _ordersServed = 0;
+        _waitTime     = 1f;
 
         foreach (var customer in _customers)
         {
-            if (customer.HasOrders())
-            {
-                customer.AnimateDeparture(CustomerBackground, GetCustomerWaypoint());
-            }
-            else
-            {
-                customer.Return();
-            }
+            customer.AnimateDeparture(CustomerBackground, GetCustomerWaypoint());
         }
 
         _customers.Clear();
@@ -83,10 +82,11 @@ public class CustomerController : BaseController<CustomerController>
             if (customer.TryServeOrder(order))
             {
                 _ordersServed++;
-                if (!customer.HasOrders())
+                if (!customer.IsServable())
                 {
                     customer.AnimateDeparture(CustomerBackground, GetCustomerWaypoint());
                     _customers.Remove(customer);
+                    _waitTime = 1f;
                 }
 
                 CheckWinCondition();
@@ -104,8 +104,7 @@ public class CustomerController : BaseController<CustomerController>
             if (customer)
             {
                 var orders = new List<Order>();
-                var n = Random.Range(1,
-                    Mathf.Clamp((OrdersRemaining - CustomersRemaining) + 1, 1, OrdersPerCustomer) + 1);
+                var n = Random.Range(1, Mathf.Clamp((OrdersRemaining - CustomersRemaining) + 1, 1, OrdersPerCustomer) + 1);
                 for (var i = n; i > 0; i--)
                 {
                     orders.Add(_orderHolder.GetObject());
@@ -116,6 +115,7 @@ public class CustomerController : BaseController<CustomerController>
                 OrdersRemaining -= n;
                 CustomersRemaining--;
                 CustomersRemainingChanged?.Invoke();
+                _waitTime = 1f;
             }
         }
     }

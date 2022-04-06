@@ -23,14 +23,16 @@ public class Customer : PlaceableObject
         return false;
     }
 
-    public bool HasOrders()
+    public bool IsServable()
     {
         return _orders.Count > 0 && Bubble.activeSelf;
     }
 
     public void AnimateArrival(Transform background, Transform from, Place place, List<Order> orders)
     {
+        if (_sequence != null) return;
         _orders = orders;
+        CreateOrders();
         transform.position = from.position;
         Bubble.SetActive(false);
         transform.SetParent(background);
@@ -41,12 +43,13 @@ public class Customer : PlaceableObject
         {
             transform.SetParent(place.transform);
             Bubble.SetActive(true);
-            CreateOrders();
         });
     }
 
     public void AnimateDeparture(Transform background, Transform to)
     {
+        if (_sequence != null && _orders.Count == 0) return;
+        ClearOrders();
         Bubble.SetActive(false);
         transform.SetParent(background);
         Return();
@@ -67,6 +70,17 @@ public class Customer : PlaceableObject
             var place = OrderPlaces.Find(x => x.IsFree);
             order.Place(place);
         }
+    }
+
+    void ClearOrders()
+    {
+        foreach (var order in _orders)
+        {
+            order.Return();
+            Destroy(order.gameObject);
+        }
+        
+        _orders.Clear();
     }
 
     void RefreshSequence()
