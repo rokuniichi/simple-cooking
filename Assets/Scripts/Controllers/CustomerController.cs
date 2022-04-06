@@ -31,6 +31,7 @@ public class CustomerController : BaseController<CustomerController>
     List<Customer> _customers = new List<Customer>();
 
     int   _ordersServed;
+    int   _customersServed;
     float _waitTime;
 
     void Update()
@@ -55,15 +56,13 @@ public class CustomerController : BaseController<CustomerController>
         CustomersRemaining = CustomersTotal;
         BoostersRemaining = _config.BoostersNumber;
         OrdersRemaining = OrdersTotal;
-        if (OrdersTotal < CustomersTotal)
-        {
-            Debug.LogError("Number of orders is less then number of customers!");
-        }
+        if (OrdersTotal < CustomersTotal) Debug.LogError("Number of orders is less then number of customers!");
 
         _customerHolder.PopulateHolder(CustomerSetup.CustomerEntries, CustomersTotal);
         _orderHolder.PopulateHolder(OrderSetup.OrderEntries, OrdersTotal);
-        _ordersServed = 0;
-        _waitTime     = 1f;
+        _ordersServed    = 0;
+        _customersServed = 0;
+        _waitTime        = 1f;
 
         foreach (var customer in _customers)
         {
@@ -82,11 +81,9 @@ public class CustomerController : BaseController<CustomerController>
     {
         foreach (var customer in _customers)
         {
-            if (customer.IsServable() && customer.TryServeOrder(order))
-            {
-                PostServeOrder(customer);
-                return;
-            }
+            if (!customer.IsServable() || !customer.TryServeOrder(order)) continue;
+            PostServeOrder(customer);
+            return;
         }
     }
 
@@ -98,56 +95,53 @@ public class CustomerController : BaseController<CustomerController>
     
     public void UseBooster()
     {
-        if (BoostersRemaining > 0 && _customers.Count > 0)
-        {
-            var customer = _customers[0];
-            if (customer.IsServable())
-            {
-                customer.UseBooster();
-                PostServeOrder(customer);
-                BoostersRemaining--;
-                if (BoostersRemaining == 0) _gc.Buy();
-            }
-        }
+        if (BoostersRemaining <= 0 || _customers.Count <= 0) return;
+        
+        var customer = _customers[0];
+        if (!customer.IsServable()) return;
+        
+        customer.UseBooster();
+        PostServeOrder(customer);
+        BoostersRemaining--;
+        if (BoostersRemaining == 0) _gc.Buy();
     }
 
     void PostServeOrder(Customer customer)
     {
-        if (!customer.IsServable())
-        {
-            FreeCustomer(customer);
-        }
+        if (!customer.IsServable()) FreeCustomer(customer);
         CheckWinCondition();
     }
 
     void EngageCustomer()
     {
-        var place = CustomerPlaces.Find(x => x.IsFree);
-        if (place)
+        var freePlaces = CustomerPlaces.FindAll(x => x.IsFree);
+        if (freePlaces.Count <= 0) return;
+        
+        var place = freePlaces[Random.Range(0, freePlaces.Count)];
+        if (!place) return;
+        
+        var customer = _customerHolder.GetObject();
+        if (!customer) return;
+        
+        var orders = new List<Order>();
+        var n = Random.Range(1, Mathf.Clamp((OrdersRemaining - CustomersRemaining) + 1, 1, OrdersPerCustomer) + 1);
+        for (var i = n; i > 0; i--)
         {
-            var customer = _customerHolder.GetObject();
-            if (customer)
-            {
-                var orders = new List<Order>();
-                var n = Random.Range(1, Mathf.Clamp((OrdersRemaining - CustomersRemaining) + 1, 1, OrdersPerCustomer) + 1);
-                for (var i = n; i > 0; i--)
-                {
-                    orders.Add(_orderHolder.GetObject());
-                }
-                _customers.Add(customer);
-                customer.OrderServed += OnOrderServed;
-                customer.AnimateArrival(CustomerBackground, GetCustomerWaypoint(), place, orders);
-                OrdersRemaining -= n;
-                CustomersRemaining--;
-                CustomersRemainingChanged?.Invoke();
-                _waitTime = 1f;
-            }
+            orders.Add(_orderHolder.GetObject());
         }
+        _customers.Add(customer);
+        customer.OrderServed += OnOrderServed;
+        customer.AnimateArrival(CustomerBackground, GetCustomerWaypoint(), place, orders);
+        OrdersRemaining -= n;
+        CustomersRemaining--;
+        CustomersRemainingChanged?.Invoke();
+        _waitTime = 1f;
     }
 
     void FreeCustomer(Customer customer)
     {
         _customers.Remove(customer);
+        _customersServed++;
         customer.OrderServed -= OnOrderServed;
         customer.AnimateDeparture(CustomerBackground, GetCustomerWaypoint());
         _waitTime = 1f;
@@ -160,7 +154,7 @@ public class CustomerController : BaseController<CustomerController>
 
     void CheckWinCondition()
     {
-        if (_ordersServed == OrdersTotal || _customers.Count == 0) _gc.Win();
+        if (_ordersServed == OrdersTotal || _customersServed == CustomersTotal) _gc.Win();
     }
 
     void OnOrderServed()

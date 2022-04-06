@@ -26,14 +26,12 @@ public class Customer : PlaceableObject
     public bool TryServeOrder(string order)
     {
         var o = _orders.Find(x => x.Name == order);
-        if (o)
-        {
-            ServeOrder(o);
-            _orders.Remove(o);
-            return true;
-        }
+        if (!o) return false;
+        
+        ServeOrder(o);
+        _orders.Remove(o);
+        return true;
 
-        return false;
     }
 
     public void UseBooster()
@@ -49,6 +47,7 @@ public class Customer : PlaceableObject
     public void AnimateArrival(Transform background, Transform from, Place place, List<Order> orders)
     {
         if (_sequence != null && _sequence.IsActive()) return;
+        
         _orders = orders;
         CreateOrders();
         transform.position = from.position;
@@ -67,6 +66,7 @@ public class Customer : PlaceableObject
     public void AnimateDeparture(Transform background, Transform to)
     {
         if (_sequence != null && _sequence.IsActive() && !HasOrders()) return;
+        
         ClearOrders();
         Bubble.SetActive(false);
         transform.SetParent(background);
