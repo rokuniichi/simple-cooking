@@ -1,26 +1,15 @@
 ﻿using UnityEngine;
 
-public class GameController : MonoBehaviour
+public class GameController : BaseController<GameController>
 {
-    public static GameController Instance { get; private set; }
-
     MainConfig _config;
 
     public float LevelTime { get; private set; }
 
     void Awake()
     {
-        if (Instance)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-
-        Setup();
+       base.Awake();
+       Setup();
     }
 
     void Start()
