@@ -1,1 +1,1 @@
-﻿public class OrderPool : ObjectPool<Order> { }
+﻿public class OrderHolder : ObjectHolder<Order> { }

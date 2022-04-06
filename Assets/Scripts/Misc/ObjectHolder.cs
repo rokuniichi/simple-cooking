@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectPool<T> : MonoBehaviour where T : MonoBehaviour
+public class ObjectHolder<T> : MonoBehaviour where T : MonoBehaviour
 {
     List<T> _list;
 
-    public void PopulatePool(List<T> templates, int num)
+    public void PopulateHolder(List<T> templates, int num)
     {
         _list = new List<T>();
         for (var i = num; i > 0; i--)
@@ -16,8 +16,11 @@ public class ObjectPool<T> : MonoBehaviour where T : MonoBehaviour
         }
     }
 
-    public T GetPooledObject()
+    public T GetObject()
     {
-        return _list.Find(o => !o.gameObject.activeInHierarchy);    
+        var obj = _list.Find(o => !o.gameObject.activeInHierarchy);
+        _list.Remove(obj);
+        obj.gameObject.SetActive(true);
+        return obj;
     }
 }
