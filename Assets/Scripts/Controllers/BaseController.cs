@@ -15,5 +15,9 @@ public abstract class BaseController<T> : MonoBehaviour where T : BaseController
             Instance = this as T;
             DontDestroyOnLoad(gameObject);
         }
+        
+        PreInit();
     }
+
+    protected virtual void PreInit() { }
 }

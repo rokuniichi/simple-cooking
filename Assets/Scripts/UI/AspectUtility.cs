@@ -1,9 +1,8 @@
 ﻿using System;
 using UnityEngine;
 
-public class AspectUtility : MonoBehaviour
+public class AspectUtility : BaseController<AspectUtility>
 {
-    public static AspectUtility Instance { get; private set; }
     
     const float ReferenceRatio = 16f / 9f;
 
@@ -12,15 +11,6 @@ public class AspectUtility : MonoBehaviour
     int   _currentWidth;
     int   _currentHeight;
     float _originalSize;
-    
-    void Awake() {
-        if ( Instance ) {
-            Destroy(gameObject);
-        } else {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-    }
 
     void Update()
     {

@@ -1,6 +1,7 @@
 ﻿public class MainConfig : IConfig
 {
-    public int   CustomersNumber;
-    public int   OrdersNumber;
+    public int   CustomersTotal;
+    public int   OrdersTotal;
+    public int   OrdersPerCustomer;
     public float LevelTime;
 }

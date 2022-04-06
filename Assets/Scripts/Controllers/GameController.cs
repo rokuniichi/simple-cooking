@@ -2,19 +2,12 @@
 
 public class GameController : BaseController<GameController>
 {
-    MainConfig _config;
-
+    public MainConfig Config { get; private set; }
     public float LevelTime { get; private set; }
-
-    void Awake()
-    {
-       base.Awake();
-       Setup();
-    }
 
     void Start()
     {
-        LevelTime = _config.LevelTime;
+        LevelTime = Config.LevelTime;
     }
 
     void Update()
@@ -27,9 +20,9 @@ public class GameController : BaseController<GameController>
         }
     }
 
-    void Setup()
+    protected override void PreInit()
     {
         var configHandler = new ConfigHandler();
-        _config = configHandler.Load<MainConfig>(ConfigPaths.MAIN_CONFIG_PATH);
+        Config = configHandler.Load<MainConfig>(ConfigPaths.MAIN_CONFIG_PATH);
     }
 }
