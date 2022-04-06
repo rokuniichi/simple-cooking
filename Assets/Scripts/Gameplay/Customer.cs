@@ -5,7 +5,7 @@ using UnityEngine;
 public class Customer : PlaceableObject
 {
     public List<Place> OrderPlaces;
-    public GameObject Bubble;
+    public GameObject  Bubble;
 
     Sequence    _sequence;
     List<Order> _orders;

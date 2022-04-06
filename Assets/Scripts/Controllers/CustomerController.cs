@@ -58,7 +58,14 @@ public class CustomerController : BaseController<CustomerController>
 
         foreach (var customer in _customers)
         {
-            customer.Return();
+            if (customer.HasOrders())
+            {
+                customer.AnimateDeparture(CustomerBackground, GetCustomerWaypoint());
+            }
+            else
+            {
+                customer.Return();
+            }
         }
 
         _customers.Clear();
